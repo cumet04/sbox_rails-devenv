@@ -1,0 +1,26 @@
+name: rails test and report coverage
+on:
+  push:
+    branches:
+      # TODO: mainにする
+      - coverage
+jobs:
+  test:
+    timeout-minutes: 5
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ruby/setup-ruby@v1
+        with:
+          working-directory: app
+          bundler-cache: true
+      - run: bundle exec rails test
+      - run: ./bin/summary_coverage > coverage/summary.csv
+      - uses: actions/cache@v2
+        with:
+          path: coverage_main
+          key: coverage_main
+      - run: rm -rf coverage_main && mv coverage coverage_main
