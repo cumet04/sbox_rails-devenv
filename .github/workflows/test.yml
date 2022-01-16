@@ -26,12 +26,11 @@ jobs:
           name: coverage_${{ steps.extract_branch.outputs.branch }}
           path: app/coverage
           retention-days: 3
-      - run: echo ${{ github.event_name }}
 
   report:
     timeout-minutes: 5
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'pull_request' }}
+    if: ${{ github.head_ref != null }}
     needs: test
     steps:
       - uses: actions/download-artifact@v2
