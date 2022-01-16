@@ -1,0 +1,22 @@
+{
+	"name": "Rails",
+	"dockerComposeFile": "docker-compose.yml",
+	"service": "app",
+	"workspaceFolder": "/workspace",
+	"remoteUser": "vscode",
+	"remoteEnv": {
+		"PATH":"/workspace/.devcontainer/bin:${containerEnv:PATH}"
+	},
+	"postCreateCommand": ".devcontainer/bin/initial_setup",
+	"extensions": [
+		"rebornix.Ruby"
+	],
+	"settings": {
+		"ruby.useLanguageServer": true,
+		"ruby.format": "rubocop",
+		"[ruby]": {
+			"editor.formatOnSave": true
+		},
+		"remote.autoForwardPorts": false
+	}
+}
