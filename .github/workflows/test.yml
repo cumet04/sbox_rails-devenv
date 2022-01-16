@@ -30,7 +30,7 @@ jobs:
   report:
     timeout-minutes: 5
     runs-on: ubuntu-latest
-    if: github.event.type == 'pull_request'
+    if: github.event_name == 'pull_request'
     needs: test
     steps:
       - uses: actions/download-artifact@v2
