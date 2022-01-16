@@ -1,8 +1,5 @@
 name: rails test and report coverage
 on:
-  push:
-    branches:
-      - main
   pull_request:
 jobs:
   test:
@@ -20,33 +17,8 @@ jobs:
       - run: bundle exec rails test
       - run: ./bin/summary_coverage > coverage/summary.csv
 
-      # upload
-      - run: mv coverage ../
-      - if: github.event_name == 'push'
-        uses: actions/upload-artifact@v2
+      - uses: actions/cache@v2
         with:
-          name: coverage_main
-          path: coverage
-          retention-days: 3
-      - if: github.event_name != 'push'
-        uses: actions/upload-artifact@v2
-        with:
-          name: coverage_${{ github.head_ref }}
-          path: coverage
-          retention-days: 3
-
-  report:
-    timeout-minutes: 5
-    runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'pull_request' }}
-    needs: test
-    steps:
-      - uses: actions/download-artifact@v2
-        with:
-          name: coverage_${{github.head_ref}}
-      - run: mv coverage coverage_head
-
-      - uses: actions/download-artifact@v2
-        with:
-          name: coverage_${{github.base_ref}}
-      - run: diff coverage/summary.csv coverage_head/summary.csv
+          path: coverage_main
+          key: coverage_main
+      - run: diff coverage_main/summary.csv coverage/summary.csv
