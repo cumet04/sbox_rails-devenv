@@ -1,6 +1,7 @@
 name: rails test and report coverage
 on:
   push:
+  pull_request:
 defaults:
   run:
     working-directory: app
@@ -26,6 +27,12 @@ jobs:
           name: coverage_${{ steps.extract_branch.outputs.branch }}
           path: app/coverage
           retention-days: 3
+      - run: echo ${{ github.event_name}}
+      - run: echo ${{ github.head_ref }}
+      - run: echo eq null
+        if: ${{ github.head_ref == null }}
+      - run: echo eq empty
+        if: ${{ github.head_ref == '' }}
 
   report:
     timeout-minutes: 5
