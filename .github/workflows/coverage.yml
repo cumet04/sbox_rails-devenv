@@ -14,14 +14,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: fetch main coverage
+      - name: fetch base coverage
         uses: actions/download-artifact@v2
         with:
-          # TODO: mainにする
-          name: coverage_coverage
-      - run: mv coverage coverage_main
+          name: coverage_${{github.base_ref}}
+      - run: mv coverage coverage_base
       - name: fetch main coverage
         uses: actions/download-artifact@v2
         with:
           name: coverage_${{github.head_ref}}
-      - run: diff coverage_main/summary.csv coverage/summary.csv
+      - run: diff coverage_base/summary.csv coverage/summary.csv
