@@ -1,4 +1,4 @@
-name: rails test
+name: rails test and report coverage
 on:
   push:
 defaults:
@@ -26,3 +26,19 @@ jobs:
           name: coverage_${{ steps.extract_branch.outputs.branch }}
           path: app/coverage
           retention-days: 3
+
+  report:
+    timeout-minutes: 5
+    runs-on: ubuntu-latest
+    if: github.event.type == 'pull_request'
+    needs: test
+    steps:
+      - uses: actions/download-artifact@v2
+        with:
+          name: coverage_${{github.head_ref}}
+      - run: mv coverage coverage_head
+
+      - uses: actions/download-artifact@v2
+        with:
+          name: coverage_${{github.base_ref}}
+      - run: diff coverage/summary.csv coverage_head/summary.csv
