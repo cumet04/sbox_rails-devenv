@@ -21,17 +21,18 @@ jobs:
       - run: ./bin/summary_coverage > coverage/summary.csv
 
       # upload
+      - run: mv coverage ../
       - if: github.event_name == 'push'
         uses: actions/upload-artifact@v2
         with:
           name: coverage_main
-          path: app/coverage
+          path: coverage
           retention-days: 3
       - if: github.event_name != 'push'
         uses: actions/upload-artifact@v2
         with:
           name: coverage_${{ github.head_ref }}
-          path: app/coverage
+          path: coverage
           retention-days: 3
 
   report:
