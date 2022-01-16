@@ -1,0 +1,26 @@
+#!/usr/bin/env ruby
+
+require "json"
+require "csv"
+
+# TODO: cwdをいい感じにrails rootに
+
+raw = JSON.parse(File.read("coverage/coverage.json"))
+
+out = CSV.generate do |csv|
+  csv << ["file", "cover[%]", "lines", "relevant lines", "lines covered"]
+
+  raw["coverage"].map do |key, values|
+    data = values["lines"]
+    lines = data.count
+
+    valid = data.reject(&:nil?)
+    relevant_lines = valid.count
+    lines_covered = valid.count(&:positive?)
+
+    cover = 100.0 * lines_covered / relevant_lines
+    csv << [key, cover, lines, relevant_lines, lines_covered]
+  end
+end
+
+puts out
