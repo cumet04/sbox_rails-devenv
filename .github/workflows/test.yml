@@ -1,6 +1,7 @@
 name: rails test and report coverage
 on:
   push:
+    branch: main
   pull_request:
 defaults:
   run:
@@ -17,27 +18,25 @@ jobs:
           bundler-cache: true
       - run: bundle exec rails test
       - run: ./bin/summary_coverage > coverage/summary.csv
-      # refs https://stackoverflow.com/questions/58033366/how-to-get-the-current-branch-within-github-actions
-      - name: Extract branch name
-        shell: bash
-        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
-        id: extract_branch
-      - uses: actions/upload-artifact@v2
+
+      # upload
+      - if: github.event_name == 'push'
+        uses: actions/upload-artifact@v2
         with:
-          name: coverage_${{ steps.extract_branch.outputs.branch }}
+          name: coverage_main
           path: app/coverage
           retention-days: 3
-      - run: echo ${{ github.event_name}}
-      - run: echo ${{ github.head_ref }}
-      - run: echo eq null
-        if: ${{ github.head_ref == null }}
-      - run: echo eq empty
-        if: ${{ github.head_ref == '' }}
+      - if: github.event_name != 'push'
+        uses: actions/upload-artifact@v2
+        with:
+          name: coverage_${{ github.head_ref }}
+          path: app/coverage
+          retention-days: 3
 
   report:
     timeout-minutes: 5
     runs-on: ubuntu-latest
-    if: ${{ github.head_ref != null }}
+    if: ${{ github.event_name == 'pull_request' }}
     needs: test
     steps:
       - uses: actions/download-artifact@v2
