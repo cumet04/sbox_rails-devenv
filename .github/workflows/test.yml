@@ -1,15 +1,13 @@
 name: rails test and report coverage
 on:
   push:
-    branch: main
+    branches: [main]
   pull_request:
-defaults:
-  run:
-    working-directory: app
 jobs:
   test:
     timeout-minutes: 5
     runs-on: ubuntu-latest
+    working-directory: app
     steps:
       - uses: actions/checkout@v2
       - uses: ruby/setup-ruby@v1
