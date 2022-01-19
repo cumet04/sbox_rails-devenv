@@ -1,0 +1,70 @@
+name: rails test and report coverage
+on:
+  push:
+    branches:
+      # TODO: mainにする
+      - coverage
+  pull_request:
+
+permissions:
+  id-token: write
+  contents: read
+
+
+jobs:
+  test:
+    timeout-minutes: 5
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ruby/setup-ruby@v1
+        with:
+          working-directory: app
+          bundler-cache: true
+      - run: bundle exec rails test
+      - run: ./bin/summary_coverage > coverage/summary.csv
+      - run: cat coverage/coverage.json
+      - run: cat coverage/summary.csv
+
+      - name: Extract branch name
+        shell: bash
+        run: |
+          OUT="${{ github.head_ref }}"
+          test -z $OUT && OUT=$(echo ${GITHUB_REF#refs/heads/})
+          echo "##[set-output name=branch;]$OUT"
+        id: extract_branch
+
+      - uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: arn:aws:iam::${{secrets.AWS_ACCOUNT}}:role/sbox_rails-devenv
+          aws-region: ap-northeast-1
+      - name: upload coverage
+        run: |
+          aws s3 cp --recursive \
+            ./coverage \
+            s3://${{ secrets.BUCKET_NAME }}/coverage/${{ steps.extract_branch.outputs.branch }}
+
+  report:
+    timeout-minutes: 5
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: arn:aws:iam::${{secrets.AWS_ACCOUNT}}:role/sbox_rails-devenv
+          aws-region: ap-northeast-1
+      - name: download main coverage
+        # TODO: mainにする
+        run: |
+          aws s3 cp s3://${{ secrets.BUCKET_NAME }}/coverage/coverage/summary.csv ./summary_main.csv
+      - name: download head coverage
+        run: |
+          aws s3 cp s3://${{ secrets.BUCKET_NAME }}/coverage/${{ github.head_ref }}/summary.csv ./summary_head.csv
+
+      - run: cat summary_main.csv
+      - run: cat summary_head.csv
+      - run: diff summary_main.csv summary_head.csv
