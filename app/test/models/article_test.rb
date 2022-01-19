@@ -8,4 +8,14 @@ class ArticleTest < ActiveSupport::TestCase
     article.title = nil
     assert_not article.valid?
   end
+
+  test "public count" do
+    assert Article.public_count == 0
+
+    Article.create!(title: "hoge", body: "foobarbaz999", status: "public")
+    assert Article.public_count == 1
+
+    Article.create!(title: "hoge", body: "foobarbaz999", status: "private")
+    assert Article.public_count == 1
+  end
 end
