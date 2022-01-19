@@ -26,8 +26,6 @@ jobs:
           bundler-cache: true
       - run: bundle exec rails test
       - run: ./bin/summary_coverage > coverage/summary.csv
-      - run: cat coverage/coverage.json
-      - run: cat coverage/summary.csv
 
       - name: Extract branch name
         shell: bash
@@ -65,6 +63,5 @@ jobs:
         run: |
           aws s3 cp s3://${{ secrets.BUCKET_NAME }}/coverage/${{ github.head_ref }}/summary.csv ./summary_head.csv
 
-      - run: cat summary_main.csv
-      - run: cat summary_head.csv
-      - run: diff summary_main.csv summary_head.csv
+      # TODO: いい感じにpullreqコメントする
+      - run: diff -U 0 --label main --label head summary_main.csv summary_head.csv

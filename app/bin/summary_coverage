@@ -3,9 +3,11 @@
 require "json"
 require "csv"
 
-# TODO: cwdをいい感じにrails rootに
+root = File.expand_path("..", __dir__)
+input_path = File.join(root, "coverage/coverage.json")
+raw = JSON.parse(input_path)
 
-raw = JSON.parse(File.read("coverage/coverage.json"))
+source_root = File.join(root, "app")
 
 out = CSV.generate do |csv|
   csv << ["file", "cover[%]", "lines", "relevant lines", "lines covered"]
@@ -19,7 +21,8 @@ out = CSV.generate do |csv|
     lines_covered = valid.count(&:positive?)
 
     cover = 100.0 * lines_covered / relevant_lines
-    csv << [key, cover, lines, relevant_lines, lines_covered]
+    path = key.delete_prefix(source_root)
+    csv << [path, cover, lines, relevant_lines, lines_covered]
   end
 end
 
