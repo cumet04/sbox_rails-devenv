@@ -5,9 +5,15 @@ on:
       # TODO: mainにする
       - coverage
   pull_request:
+
+permissions:
+  id-token: write
+  contents: read
+
 defaults:
   run:
     working-directory: app
+
 jobs:
   test:
     timeout-minutes: 5
